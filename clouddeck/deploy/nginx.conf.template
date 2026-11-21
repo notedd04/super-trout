@@ -1,0 +1,74 @@
+worker_processes 1;
+pid __STATE_DIR__/nginx.pid;
+error_log __STATE_DIR__/logs/nginx-error.log warn;
+
+events { worker_connections 1024; }
+
+http {
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+    access_log __STATE_DIR__/logs/nginx-access.log;
+    sendfile on;
+    tcp_nopush on;
+    keepalive_timeout 65;
+    client_body_temp_path __STATE_DIR__/nginx/client_body;
+    proxy_temp_path __STATE_DIR__/nginx/proxy;
+    fastcgi_temp_path __STATE_DIR__/nginx/fastcgi;
+    uwsgi_temp_path __STATE_DIR__/nginx/uwsgi;
+    scgi_temp_path __STATE_DIR__/nginx/scgi;
+    server_tokens off;
+
+    server {
+        listen 0.0.0.0:__APP_PORT__;
+        server_name _;
+        root __WEB_ROOT__;
+        index index.html;
+        client_max_body_size 1m;
+
+        add_header X-Content-Type-Options nosniff always;
+        add_header Referrer-Policy no-referrer always;
+        add_header X-Frame-Options SAMEORIGIN always;
+        add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+
+        location = /_clouddeck_auth {
+            internal;
+            proxy_pass http://127.0.0.1:8081/api/v1/auth/check;
+            proxy_pass_request_body off;
+            proxy_set_header Content-Length "";
+            proxy_set_header Cookie $http_cookie;
+            proxy_set_header Host $http_host;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        location = /vnc.html {
+            auth_request /_clouddeck_auth;
+            try_files $uri =404;
+            add_header Cache-Control "no-store" always;
+        }
+
+        location = /websockify {
+            auth_request /_clouddeck_auth;
+            proxy_pass http://127.0.0.1:6080;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "upgrade";
+            proxy_set_header Host $http_host;
+            proxy_read_timeout 3600s;
+            proxy_send_timeout 3600s;
+            proxy_buffering off;
+        }
+
+        location /api/ {
+            proxy_pass http://127.0.0.1:8081;
+            proxy_http_version 1.1;
+            proxy_set_header Host $http_host;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_set_header X-Forwarded-For $remote_addr;
+            proxy_read_timeout 30s;
+        }
+
+        location / {
+            try_files $uri $uri/ /index.html;
+        }
+    }
+}

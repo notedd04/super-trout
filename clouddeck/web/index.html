@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#101112">
+  <meta name="color-scheme" content="dark light">
+  <meta name="description" content="A secure mobile control deck for cloud desktops and game-streaming services.">
+  <meta name="application-name" content="CloudDeck">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/icons/clouddeck-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="/icons/clouddeck-192.png">
+  <link rel="stylesheet" href="/assets/app.css">
+  <title>CloudDeck</title>
+</head>
+<body>
+  <div id="boot" class="boot-screen" aria-live="polite">
+    <div class="boot-mark">C<span>.</span></div>
+    <div class="boot-label">CLOUDDECK</div>
+    <div class="boot-pulse"></div>
+  </div>
+
+  <section id="login" class="login-screen" hidden>
+    <div class="login-orbit orbit-one"></div>
+    <div class="login-orbit orbit-two"></div>
+    <div class="login-content">
+      <div class="brand-lockup">
+        <div class="brand-mark">C<span>.</span></div>
+        <div><div class="brand-name">CLOUDDECK</div><div class="brand-edition">PERSONAL CLOUD CONSOLE</div></div>
+      </div>
+      <div class="login-copy">
+        <div class="eyebrow">PRIVATE WORKSPACE</div>
+        <h1>Your cloud.<br><span>On your terms.</span></h1>
+        <p>Sign in with the one-time access key created by your Codespace installer.</p>
+      </div>
+      <form id="login-form" class="login-form">
+        <label class="field-label" for="access-key">CLOUDDECK ACCESS KEY</label>
+        <div class="input-shell">
+          <input id="access-key" name="password" type="password" autocomplete="current-password" autocapitalize="off" spellcheck="false" placeholder="Enter your access key" required>
+          <button id="reveal-key" class="icon-button reveal-button" type="button" aria-label="Show access key">◉</button>
+        </div>
+        <button class="button button-primary button-wide" type="submit"><span>Unlock CloudDeck</span><span aria-hidden="true">↗</span></button>
+        <p id="login-error" class="form-error" role="alert"></p>
+      </form>
+      <div class="login-foot"><span class="lock-glyph">▣</span> This control panel is protected by your private Codespace and a separate access key.</div>
+    </div>
+  </section>
+
+  <div id="app" class="app-shell" hidden>
+    <header class="topbar">
+      <button class="brand-button" data-nav="home" aria-label="CloudDeck home">
+        <span class="brand-mark small">C<span>.</span></span>
+        <span class="brand-stack"><span class="brand-name">CLOUDDECK</span><span class="brand-edition">PERSONAL CLOUD CONSOLE</span></span>
+      </button>
+      <div class="topbar-right">
+        <div id="connection-pill" class="connection-pill"><span class="status-dot"></span><span id="connection-label">CHECKING</span></div>
+        <button id="profile-button" class="avatar-button" aria-label="Open settings">E</button>
+      </div>
+    </header>
+
+    <main id="main-content" class="main-content">
+      <section id="screen-home" class="screen-view active" data-screen="home">
+        <div class="page-heading">
+          <div><div class="eyebrow" id="workspace-eyebrow">YOUR CLOUD ENVIRONMENT</div><h1>Welcome back<span class="heading-period">.</span></h1><p class="page-subtitle">One place for your cloud desktop and games.</p></div>
+          <div class="date-chip"><span class="date-chip-dot"></span><span id="workspace-name">CODESPACE</span></div>
+        </div>
+
+        <section class="hero-card">
+          <div class="hero-grid" aria-hidden="true"></div>
+          <div class="hero-orbit" aria-hidden="true"></div>
+          <div class="hero-content">
+            <div class="hero-topline"><span class="eyebrow light">CLOUD WORKSPACE / 01</span><span id="desktop-state" class="state-label"><span class="status-dot"></span> OFFLINE</span></div>
+            <div class="hero-title">Your desktop<br><span>is waiting.</span></div>
+            <p id="hero-description" class="hero-description">Start a private Linux session and bring your workspace onto this device.</p>
+            <div class="hero-actions">
+              <button id="start-session" class="button button-light"><span class="button-icon">▶</span><span>Start session</span></button>
+              <button id="open-viewer" class="button button-ghost-light" disabled><span>Open desktop</span><span aria-hidden="true">↗</span></button>
+            </div>
+          </div>
+          <div class="hero-console" aria-hidden="true">
+            <div class="console-window"><div class="console-bar"><i></i><i></i><i></i><span>clouddeck / session</span></div><div class="console-lines"><b></b><b></b><b></b><b></b><b></b><b></b></div><div class="console-cursor"></div></div>
+            <div class="console-tag">LINUX / REMOTE</div>
+          </div>
+        </section>
+
+        <div class="section-heading"><div><div class="eyebrow">YOUR ENVIRONMENT</div><h2>Workspace</h2></div><button class="text-action" data-nav="workspace">Manage <span>→</span></button></div>
+        <div class="workspace-grid">
+          <article class="workspace-card primary-card">
+            <div class="card-icon terminal-icon">⌘</div><div class="card-title-row"><h3>Codespaces desktop</h3><span class="mini-status" id="workspace-status">READY</span></div>
+            <p>Private Linux desktop hosted inside your current Codespace.</p>
+            <div class="card-meta"><span id="profile-name">Balanced profile</span><span class="meta-separator"></span><span id="desktop-resolution">1024 × 576</span></div>
+          </article>
+          <article class="workspace-card">
+            <div class="card-icon game-icon">◎</div><div class="card-title-row"><h3>Cloud gaming</h3><span class="mini-status muted-status">EXTERNAL</span></div>
+            <p>Open a dedicated game-streaming provider built for low-spec phones.</p>
+            <button class="inline-action" data-nav="play">Explore gaming <span>↗</span></button>
+          </article>
+        </div>
+
+        <div class="section-heading compact-heading"><div><div class="eyebrow">QUICK ACCESS</div><h2>Launch tools</h2></div></div>
+        <div class="quick-grid">
+          <button class="quick-card" data-launch="terminal"><span class="quick-icon">⌁</span><span><b>Terminal</b><small>Command line</small></span><span class="quick-arrow">↗</span></button>
+          <button class="quick-card" data-launch="files"><span class="quick-icon">▤</span><span><b>Files</b><small>Desktop file manager</small></span><span class="quick-arrow">↗</span></button>
+          <button class="quick-card" data-launch="editor"><span class="quick-icon">▧</span><span><b>Text editor</b><small>Lightweight editor</small></span><span class="quick-arrow">↗</span></button>
+        </div>
+      </section>
+
+      <section id="screen-play" class="screen-view" data-screen="play">
+        <div class="page-heading"><div><div class="eyebrow">GAME DISCOVERY</div><h1>Play<span class="heading-period">.</span></h1><p class="page-subtitle">Choose the right engine for the game.</p></div><div class="date-chip">MOBILE FIRST</div></div>
+        <article class="feature-provider">
+          <div class="provider-top"><span class="provider-kicker">CLOUD GAME SERVICE</span><span class="provider-tag">REMOTE GPU</span></div>
+          <div class="provider-logo">C<span>M</span></div>
+          <h2>CloudMoon</h2>
+          <p>Play supported mobile and PC titles through its own cloud gaming infrastructure. Games run on the provider's servers, not on your OPPO.</p>
+          <div class="provider-details"><span><b>01</b> No large game installs</span><span><b>02</b> External game catalogue</span><span><b>03</b> Browser entry available</span></div>
+          <a class="button button-primary button-wide provider-launch" href="https://www.cloudmoonapp.com/" target="_blank" rel="noopener noreferrer"><span>Open CloudMoon</span><span>↗</span></a>
+          <p class="provider-note">CloudMoon is a separate service. Account access, supported games, queues, regional availability and free play limits are controlled by its provider. CloudDeck does not claim to bypass those restrictions.</p>
+        </article>
+        <div class="section-heading"><div><div class="eyebrow">PC GAMING</div><h2>Cloud PC route</h2></div></div>
+        <article class="info-card gpu-card"><div class="card-icon gpu-icon">▣</div><div><h3>Dedicated GPU host</h3><p>For Steam and heavier PC games, the host needs a real GPU and a low-latency video encoder. Codespaces is not configured as that gaming host.</p><span class="status-line"><i></i> Provider integration planned</span></div></article>
+        <article class="info-card"><div class="card-icon">◈</div><div><h3>Codespaces desktop</h3><p>Good for coding, lightweight Linux tools and basic applications. It is a CPU-oriented development environment in this setup, not a substitute for a gaming GPU.</p><button class="inline-action" data-nav="workspace">Open workspace settings <span>→</span></button></div></article>
+        <div class="network-note"><span class="note-icon">i</span><p>Cloud gaming is bandwidth-sensitive. Start with the lowest stream quality, test on Wi-Fi first, and keep an eye on mobile-data usage.</p></div>
+      </section>
+
+      <section id="screen-workspace" class="screen-view" data-screen="workspace">
+        <div class="page-heading"><div><div class="eyebrow">REMOTE ENVIRONMENT</div><h1>Workspace<span class="heading-period">.</span></h1><p class="page-subtitle">Manage your Codespace desktop session.</p></div></div>
+        <article class="session-panel">
+          <div class="session-panel-head"><div><div class="eyebrow">CLOUD PROVIDER</div><h2>GitHub Codespaces</h2></div><span id="workspace-panel-state" class="state-pill">OFFLINE</span></div>
+          <div class="session-facts"><div><small>WORKSPACE</small><b id="workspace-name-full">Detecting…</b></div><div><small>STREAM ENGINE</small><b>VNC / WebSocket</b></div><div><small>DISPLAY</small><b id="workspace-display">—</b></div></div>
+          <div class="session-actions"><button id="workspace-start" class="button button-primary">Start desktop</button><button id="workspace-stop" class="button button-secondary" disabled>Stop desktop</button></div>
+        </article>
+        <div class="section-heading"><div><div class="eyebrow">PERFORMANCE</div><h2>Session profile</h2></div></div>
+        <div id="profile-options" class="profile-list">
+          <button class="profile-option" data-profile="data_saver"><span class="profile-radio"></span><span class="profile-copy"><b>Data saver</b><small>800 × 450 · reduced display detail</small></span><span class="profile-label">LOW DATA</span></button>
+          <button class="profile-option selected" data-profile="balanced"><span class="profile-radio"></span><span class="profile-copy"><b>Balanced</b><small>1024 × 576 · recommended starting point</small></span><span class="profile-label">DEFAULT</span></button>
+          <button class="profile-option" data-profile="portrait"><span class="profile-radio"></span><span class="profile-copy"><b>Portrait</b><small>576 × 1024 · upright phone use</small></span><span class="profile-label">PORTRAIT</span></button>
+          <button class="profile-option" data-profile="desktop"><span class="profile-radio"></span><span class="profile-copy"><b>Desktop</b><small>1280 × 720 · larger workspace</small></span><span class="profile-label">DETAIL</span></button>
+        </div>
+        <div class="section-heading"><div><div class="eyebrow">RESOURCE MONITOR</div><h2>Host status</h2></div><button id="refresh-metrics" class="text-action">Refresh ↻</button></div>
+        <div class="metrics-grid"><div class="metric-card"><small>MEMORY</small><strong id="memory-value">—</strong><div class="metric-track"><i id="memory-bar"></i></div><span id="memory-caption">Awaiting host data</span></div><div class="metric-card"><small>CPU LOAD / 1 MIN</small><strong id="cpu-value">—</strong><div class="metric-track"><i id="cpu-bar"></i></div><span>Load average, not CPU percentage</span></div></div>
+      </section>
+
+      <section id="screen-sessions" class="screen-view" data-screen="sessions">
+        <div class="page-heading"><div><div class="eyebrow">SESSION HISTORY</div><h1>Sessions<span class="heading-period">.</span></h1><p class="page-subtitle">What CloudDeck has actually done.</p></div></div>
+        <article class="history-summary"><div><div class="eyebrow">CURRENT STATE</div><h2 id="history-current">No active desktop</h2><p id="history-caption">Your control plane can stay online while the desktop is stopped.</p></div><div class="history-ring" id="history-ring"><span id="history-ring-dot"></span></div></article>
+        <div class="section-heading"><div><div class="eyebrow">LOCAL AUDIT TRAIL</div><h2>Recent activity</h2></div><button id="refresh-events" class="text-action">Refresh ↻</button></div>
+        <div id="event-list" class="event-list"><div class="empty-state"><span>◷</span><b>No activity yet</b><small>Your session events will appear here.</small></div></div>
+      </section>
+
+      <section id="screen-settings" class="screen-view" data-screen="settings">
+        <div class="page-heading"><div><div class="eyebrow">PREFERENCES & SECURITY</div><h1>Settings<span class="heading-period">.</span></h1><p class="page-subtitle">Keep the controls where they belong.</p></div></div>
+        <div class="settings-group"><div class="settings-heading"><div><div class="eyebrow">APPEARANCE</div><h2>Interface</h2></div></div><div class="setting-row"><div><b>Theme</b><small>Choose the console appearance.</small></div><div class="segmented" role="group" aria-label="Theme"><button data-theme-choice="dark" class="active">Dark</button><button data-theme-choice="light">Light</button></div></div><div class="setting-row"><div><b>Haptic feedback</b><small>Short vibration on supported controls.</small></div><label class="switch"><input id="haptics-setting" type="checkbox"><span></span></label></div></div>
+        <div class="settings-group"><div class="settings-heading"><div><div class="eyebrow">INPUT</div><h2>Game controls</h2></div></div><div class="setting-row"><div><b>Virtual controls</b><small>Show the on-screen keyboard gamepad in desktop view.</small></div><label class="switch"><input id="controls-setting" type="checkbox" checked><span></span></label></div><div class="setting-row"><div><b>Physical controller</b><small id="gamepad-support">Detects compatible browser Gamepad API devices.</small></div><span class="setting-value" id="gamepad-status">NOT CHECKED</span></div></div>
+        <div class="settings-group"><div class="settings-heading"><div><div class="eyebrow">SECURITY</div><h2>Access</h2></div></div><div class="security-row"><span class="security-icon">▣</span><div><b>Private Codespace port</b><small>Keep port 8080 private. The viewer and control API are protected by your CloudDeck session.</small></div><span class="secure-check">●</span></div><button id="logout-button" class="button button-secondary button-wide logout-button">Sign out of CloudDeck</button></div>
+        <div class="settings-footer"><span>CloudDeck 0.2.0</span><span>Mobile console · Codespaces edition</span></div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="Main navigation">
+      <button class="nav-item active" data-nav="home"><span class="nav-symbol">⌂</span><span>Home</span></button>
+      <button class="nav-item" data-nav="play"><span class="nav-symbol">◉</span><span>Play</span></button>
+      <button class="nav-item" data-nav="workspace"><span class="nav-symbol">▣</span><span>Workspace</span></button>
+      <button class="nav-item" data-nav="sessions"><span class="nav-symbol">◷</span><span>Sessions</span></button>
+      <button class="nav-item" data-nav="settings"><span class="nav-symbol">⚙</span><span>Settings</span></button>
+    </nav>
+  </div>
+
+  <section id="viewer" class="viewer-shell" hidden aria-label="Cloud desktop viewer">
+    <div class="viewer-topbar"><button id="viewer-back" class="viewer-icon-button" aria-label="Close viewer">×</button><div class="viewer-title"><b>CloudDeck Stream</b><small id="viewer-profile">BALANCED · 1024 × 576</small></div><div class="viewer-top-actions"><span id="viewer-connection" class="viewer-live"><i></i> LIVE SESSION</span><button id="viewer-controls-toggle" class="viewer-icon-button" aria-label="Toggle game controls">⌖</button><button id="viewer-fullscreen" class="viewer-icon-button" aria-label="Enter fullscreen">⛶</button></div></div>
+    <div class="viewer-stage"><iframe id="desktop-frame" title="Remote Linux desktop" allow="clipboard-read; clipboard-write; gamepad; fullscreen" referrerpolicy="same-origin"></iframe><div id="stream-placeholder" class="stream-placeholder"><div class="stream-spinner"></div><b>Connecting to your desktop</b><span>The stream opens after the host responds.</span></div></div>
+    <div id="game-controls" class="game-controls">
+      <div id="touchpad" class="touchpad" aria-label="Floating desktop touchpad"><span>DRAG TO MOVE</span><div class="touchpad-actions"><button data-pointer-button="left">LEFT</button><button data-pointer-button="right">RIGHT</button></div></div>
+      <div class="control-hint"><span>TOUCH INPUT</span><span id="controller-hint">Keyboard bridge · WASD / Space / E / Q</span></div>
+      <div class="control-deck">
+        <div class="dpad" aria-label="Movement controls">
+          <button class="pad-up" data-key="w" aria-label="Move up">⌃</button>
+          <button class="pad-left" data-key="a" aria-label="Move left">‹</button>
+          <button class="pad-center" disabled>+</button>
+          <button class="pad-right" data-key="d" aria-label="Move right">›</button>
+          <button class="pad-down" data-key="s" aria-label="Move down">⌄</button>
+        </div>
+        <div class="action-pad" aria-label="Action controls"><button data-key="q" class="action-q">Q</button><button data-key="e" class="action-e">E</button><button data-key="space" class="action-primary">A</button><button data-key="shift" class="action-shift">B</button></div>
+      </div>
+      <div class="control-footer"><span>Hold a control to keep the key pressed.</span><button id="release-input" class="release-button">RELEASE ALL</button></div>
+    </div>
+    <div class="viewer-bottom"><span>PRIVATE STREAM · <b>128-bit session cookie</b></span><button id="viewer-keyboard" class="viewer-bottom-action">SHOW KEYBOARD</button></div>
+  </section>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/assets/app.js" defer></script>
+</body>
+</html>

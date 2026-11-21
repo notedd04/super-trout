@@ -1,13 +1,15 @@
 {
   "name": "EchoCloud Personal Workstation",
   "build": { "dockerfile": "Dockerfile", "context": ".." },
-  "forwardPorts": [6080, 5901, 8000],
+  "forwardPorts": [6080, 5901, 8000, 8080],
   "portsAttributes": {
     "6080": { "label": "EchoCloud Desktop", "onAutoForward": "openPreview", "visibility": "private" },
     "5901": { "label": "VNC", "visibility": "private" },
-    "8000": { "label": "EchoCloud API", "visibility": "private" }
+    "8000": { "label": "EchoCloud API", "visibility": "private" },
+    "8080": { "label": "CloudDeck PWA", "visibility": "private" }
   },
   "postCreateCommand": "bash /workspaces/codespaces-blank/scripts/provision.sh",
+  "postStartCommand": "bash -lc 'export CLOUDDECK_STATE_DIR=/workspaces/codespaces-blank/.clouddeck; if [ -x /workspaces/codespaces-blank/.clouddeck/boot-clouddeck.sh ]; then /workspaces/codespaces-blank/.clouddeck/boot-clouddeck.sh; else bash /workspaces/codespaces-blank/clouddeck/scripts/setup.sh; fi'",
   "remoteUser": "vscode",
   "containerUser": "vscode",
   "runArgs": ["--shm-size=1g"],

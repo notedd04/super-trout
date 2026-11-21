@@ -1,0 +1,18 @@
+{
+  "id": "/",
+  "name": "CloudDeck — Personal Cloud Console",
+  "short_name": "CloudDeck",
+  "description": "A secure mobile console for cloud desktops and game streaming services.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["fullscreen", "standalone"],
+  "orientation": "any",
+  "background_color": "#101112",
+  "theme_color": "#101112",
+  "categories": ["games", "productivity", "utilities"],
+  "icons": [
+    { "src": "/icons/clouddeck-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/clouddeck-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

@@ -8,3 +8,5 @@ android/local.properties
 *.jks
 *.keystore
 .env
+.clouddeck/
+CloudDeck-*-codespaces.zip
