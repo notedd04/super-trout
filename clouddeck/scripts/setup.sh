@@ -25,13 +25,13 @@ if command -v apt-get >/dev/null 2>&1; then
   sudo apt-get update
   sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     nginx xfce4 xfce4-terminal xfce4-session xfce4-panel xfdesktop4 xfwm4 xfce4-settings \
-    thunar mousepad dbus-x11 xvfb x11vnc novnc websockify xdotool fonts-dejavu-core \
+    thunar mousepad dbus-x11 xvfb x11vnc novnc websockify xdotool x11-xserver-utils ffmpeg fonts-dejavu-core \
     curl ca-certificates python3-venv python3-pip
 elif command -v apk >/dev/null 2>&1; then
   sudo apk update
   sudo apk add \
     nginx xfce4 xfce4-terminal xfce4-session xfce4-panel xfdesktop xfwm4 xfce4-settings \
-    thunar mousepad dbus-x11 xvfb x11vnc novnc websockify xdotool font-dejavu \
+    thunar mousepad dbus-x11 xvfb x11vnc novnc websockify xdotool xrdb ffmpeg font-dejavu \
     curl ca-certificates py3-pip py3-virtualenv python3
 else
   echo "Unsupported package manager; apt-get or apk is required." >&2

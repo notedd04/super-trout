@@ -49,6 +49,9 @@ class CodespacesProvider:
     def heartbeat(self) -> dict[str, Any]:
         return self.manager.heartbeat()
 
+    def screenshot(self) -> dict[str, Any]:
+        return self.manager.screenshot()
+
     def pointer(self, dx: int, dy: int, button: str | None = None, scroll_y: int = 0) -> dict[str, Any]:
         return self.manager.pointer(dx, dy, button=button, scroll_y=scroll_y)
 

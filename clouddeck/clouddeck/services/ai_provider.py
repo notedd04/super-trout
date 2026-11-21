@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import base64
 from pathlib import Path
 from typing import Any
 
@@ -72,6 +73,43 @@ class AIProvider:
         payload = response.json()
         try:
             choice = payload["choices"][0]["message"]
+        except (KeyError, IndexError, TypeError) as error:
+            raise RuntimeError("AI provider returned an unexpected response.") from error
+        return {"role": choice.get("role", "assistant"), "content": choice.get("content", "")}
+
+    def review_screenshot(self, screenshot_path: Path, prompt: str, max_tokens: int = 1024) -> dict[str, Any]:
+        config = self._config()
+        if not self.key_path.is_file():
+            raise RuntimeError("Configure an AI API key first.")
+        if not config.get("base_url") or not config.get("model"):
+            raise RuntimeError("Configure a base URL and model first.")
+        if not screenshot_path.is_file():
+            raise RuntimeError("No desktop screenshot is available.")
+        if len(prompt) > 32_000:
+            raise ValueError("Prompt must be 32 KB or smaller.")
+        encoded = base64.b64encode(screenshot_path.read_bytes()).decode("ascii")
+        api_key = self.key_path.read_text(encoding="utf-8").strip()
+        payload = {
+            "model": config["model"],
+            "messages": [{
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": prompt},
+                    {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{encoded}"}},
+                ],
+            }],
+            "max_tokens": max(64, min(max_tokens, 4096)),
+        }
+        with httpx.Client(timeout=60) as client:
+            response = client.post(
+                f"{config['base_url']}/chat/completions",
+                headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+                json=payload,
+            )
+        if response.status_code >= 400:
+            raise RuntimeError(f"AI provider returned HTTP {response.status_code}.")
+        try:
+            choice = response.json()["choices"][0]["message"]
         except (KeyError, IndexError, TypeError) as error:
             raise RuntimeError("AI provider returned an unexpected response.") from error
         return {"role": choice.get("role", "assistant"), "content": choice.get("content", "")}

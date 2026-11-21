@@ -6,7 +6,7 @@ from collections import defaultdict, deque
 from typing import Any
 
 from fastapi import FastAPI, HTTPException, Request, Response
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 from pydantic import BaseModel, Field
 import httpx
 
@@ -102,6 +102,10 @@ class AIKeyRequest(BaseModel):
 class AIChatRequest(BaseModel):
     messages: list[dict[str, str]] = Field(min_length=1, max_length=12)
     max_tokens: int = Field(default=1024, ge=64, le=4096)
+
+
+class AIScreenshotReviewRequest(BaseModel):
+    prompt: str = Field(default="Review this desktop screenshot and explain what is visible.", min_length=1, max_length=32000)
 
 
 class AutomationRequest(BaseModel):
@@ -348,6 +352,21 @@ def ai_key(payload: AIKeyRequest, request: Request) -> dict[str, Any]:
     return result
 
 
+@app.post("/api/v1/ai/review-screenshot")
+def ai_review_screenshot(payload: AIScreenshotReviewRequest, request: Request) -> dict[str, Any]:
+    require_auth(request, mutation=True)
+    screenshot_dir = settings.state_dir / "screenshots"
+    files = sorted(screenshot_dir.glob("desktop-*.png"), key=lambda path: path.stat().st_mtime, reverse=True) if screenshot_dir.is_dir() else []
+    if not files:
+        raise HTTPException(status_code=404, detail="Capture a desktop screenshot first.")
+    try:
+        result = ai_provider.review_screenshot(files[0], payload.prompt)
+    except (RuntimeError, ValueError, httpx.HTTPError) as error:
+        raise HTTPException(status_code=502 if isinstance(error, RuntimeError) else 422, detail=str(error)) from error
+    database.event("ai.screenshot.reviewed", {"prompt_chars": len(payload.prompt)})
+    return result
+
+
 @app.post("/api/v1/ai/chat")
 def ai_chat(payload: AIChatRequest, request: Request) -> dict[str, Any]:
     require_auth(request, mutation=True)
@@ -357,6 +376,27 @@ def ai_chat(payload: AIChatRequest, request: Request) -> dict[str, Any]:
         raise HTTPException(status_code=502 if isinstance(error, RuntimeError) else 422, detail=str(error)) from error
     database.event("ai.chat.completed", {"message_count": len(payload.messages)})
     return result
+
+
+@app.post("/api/v1/desktop/screenshot")
+def desktop_screenshot(request: Request) -> dict[str, Any]:
+    require_auth(request, mutation=True)
+    try:
+        result = provider.screenshot()
+    except RuntimeError as error:
+        raise HTTPException(status_code=503, detail=str(error)) from error
+    database.event("desktop.screenshot.captured", {"bytes": result["bytes"]})
+    return result
+
+
+@app.get("/api/v1/desktop/screenshot/latest")
+def desktop_screenshot_latest(request: Request) -> FileResponse:
+    require_auth(request)
+    screenshot_dir = settings.state_dir / "screenshots"
+    files = sorted(screenshot_dir.glob("desktop-*.png"), key=lambda path: path.stat().st_mtime, reverse=True) if screenshot_dir.is_dir() else []
+    if not files:
+        raise HTTPException(status_code=404, detail="No desktop screenshot has been captured.")
+    return FileResponse(files[0], media_type="image/png", filename=files[0].name)
 
 
 @app.get("/api/v1/events")

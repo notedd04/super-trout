@@ -21,12 +21,12 @@ fi
 if command -v apk >/dev/null 2>&1; then
   sudo apk add \
     firefox xfce4-terminal thunar mousepad dbus-x11 xvfb x11vnc novnc websockify xdotool \
-    xrdb mesa vulkan-loader git curl ca-certificates python3 py3-pip
+    xrdb ffmpeg mesa vulkan-loader git curl ca-certificates python3 py3-pip
 elif command -v apt-get >/dev/null 2>&1; then
   sudo apt-get update
   sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     firefox xfce4 xfce4-terminal thunar mousepad dbus-x11 xvfb x11vnc novnc websockify xdotool \
-    x11-xserver-utils mesa-utils vulkan-tools git curl ca-certificates python3 python3-pip python3-venv
+    x11-xserver-utils ffmpeg mesa-utils vulkan-tools git curl ca-certificates python3 python3-pip python3-venv
 else
   echo 'Unsupported package manager.' >&2
   exit 1

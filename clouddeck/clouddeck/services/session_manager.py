@@ -4,6 +4,7 @@ import os
 import signal
 import shutil
 import subprocess
+from datetime import datetime, timezone
 import threading
 import time
 import fcntl
@@ -308,6 +309,30 @@ class SessionManager:
     def release_all(self) -> None:
         with self._exclusive():
             self._release_all_locked()
+
+    def screenshot(self) -> dict[str, Any]:
+        with self._exclusive():
+            if not self.status()["running"]:
+                raise RuntimeError("The desktop is not running.")
+            ffmpeg = shutil.which("ffmpeg")
+            if not ffmpeg:
+                raise RuntimeError("ffmpeg is not installed.")
+            screenshot_dir = self.state_dir / "screenshots"
+            screenshot_dir.mkdir(parents=True, exist_ok=True)
+            timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+            target = screenshot_dir / f"desktop-{timestamp}.png"
+            env = os.environ.copy()
+            env["DISPLAY"] = self.display
+            result = subprocess.run(
+                [ffmpeg, "-y", "-f", "x11grab", "-i", self.display, "-frames:v", "1", str(target)],
+                env=env,
+                capture_output=True,
+                timeout=15,
+                check=False,
+            )
+            if result.returncode != 0 or not target.is_file():
+                raise RuntimeError("The desktop screenshot could not be captured.")
+            return {"path": str(target), "bytes": target.stat().st_size, "captured_at": timestamp}
 
     def pointer(self, dx: int, dy: int, button: str | None = None, scroll_y: int = 0) -> dict[str, Any]:
         with self._exclusive():

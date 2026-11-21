@@ -608,6 +608,22 @@
     } catch (error) { $('#automation-output').textContent = error.message; }
   }));
 
+  $('#desktop-capture').addEventListener('click', async () => {
+    try {
+      const result = await request('/api/v1/desktop/screenshot', { method: 'POST' });
+      $('#ai-output').textContent = `Screenshot captured: ${result.bytes} bytes`;
+      showToast('Desktop screenshot captured.');
+    } catch (error) { $('#ai-output').textContent = error.message; }
+  });
+  $('#ai-review-screen').addEventListener('click', async () => {
+    $('#ai-output').textContent = 'Capturing and asking the configured vision model...';
+    try {
+      await request('/api/v1/desktop/screenshot', { method: 'POST' });
+      const result = await request('/api/v1/ai/review-screenshot', { method: 'POST', body: { prompt: 'Review this Linux desktop screenshot. Identify visible apps, windows, errors, icons and the likely next useful action.' } });
+      $('#ai-output').textContent = result.content || '(No response)';
+    } catch (error) { $('#ai-output').textContent = error.message; }
+  });
+
   $('#ai-send').addEventListener('click', async () => {
     const prompt = $('#ai-chat').value.trim();
     if (!prompt) return;
