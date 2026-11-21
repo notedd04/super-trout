@@ -101,6 +101,17 @@ def test_developer_workspace_save_and_run_are_authenticated(tmp_path):
     assert run.json()["stdout"].strip() == "hello"
 
 
+def test_automation_rejects_unknown_recipe():
+    client.cookies.clear()
+    csrf = login()
+    response = client.post(
+        "/api/v1/automation/run",
+        json={"recipe": "rm -rf /"},
+        headers={"Origin": "https://testserver", "X-CSRF-Token": csrf},
+    )
+    assert response.status_code == 422
+
+
 def test_ai_status_does_not_expose_credentials():
     client.cookies.clear()
     csrf = login()

@@ -102,6 +102,8 @@
           <button class="quick-card" data-launch="terminal"><span class="quick-icon">⌁</span><span><b>Terminal</b><small>Command line</small></span><span class="quick-arrow">↗</span></button>
           <button class="quick-card" data-launch="files"><span class="quick-icon">▤</span><span><b>Files</b><small>Desktop file manager</small></span><span class="quick-arrow">↗</span></button>
           <button class="quick-card" data-launch="editor"><span class="quick-icon">▧</span><span><b>Text editor</b><small>Lightweight editor</small></span><span class="quick-arrow">↗</span></button>
+          <button class="quick-card" data-launch="browser"><span class="quick-icon">◎</span><span><b>Browser</b><small>Firefox desktop</small></span><span class="quick-arrow">↗</span></button>
+          <button class="quick-card" data-launch="settings"><span class="quick-icon">⚙</span><span><b>Linux settings</b><small>XFCE preferences</small></span><span class="quick-arrow">↗</span></button>
         </div>
       </section>
 
@@ -140,6 +142,41 @@
         <div class="metrics-grid"><div class="metric-card"><small>MEMORY</small><strong id="memory-value">—</strong><div class="metric-track"><i id="memory-bar"></i></div><span id="memory-caption">Awaiting host data</span></div><div class="metric-card"><small>CPU LOAD / 1 MIN</small><strong id="cpu-value">—</strong><div class="metric-track"><i id="cpu-bar"></i></div><span>Load average, not CPU percentage</span></div></div>
       </section>
 
+      <section id="screen-build" class="screen-view" data-screen="build">
+        <div class="page-heading"><div><div class="eyebrow">DEVELOP & AUTOMATE</div><h1>Build<span class="heading-period">.</span></h1><p class="page-subtitle">Create scripts, run them locally, and connect an AI model.</p></div></div>
+        <div class="build-grid">
+          <article class="settings-group build-panel">
+            <div class="settings-heading"><div><div class="eyebrow">PYTHON WORKSPACE</div><h2>Script runner</h2></div></div>
+            <label class="field-label" for="developer-name">FILE NAME</label>
+            <input id="developer-name" class="build-input" value="hello-clouddeck.py" maxlength="100" autocomplete="off">
+            <label class="field-label" for="developer-code">PYTHON SOURCE</label>
+            <textarea id="developer-code" class="build-editor" maxlength="100000" spellcheck="false">print("CloudDeck developer environment online")</textarea>
+            <div class="build-actions"><button id="developer-save" class="button button-secondary">Save</button><button id="developer-run" class="button button-primary">Run</button></div>
+            <pre id="developer-output" class="build-output">No run output yet.</pre>
+          </article>
+          <article class="settings-group build-panel">
+            <div class="settings-heading"><div><div class="eyebrow">OPENAI-COMPATIBLE API</div><h2>AI connection</h2></div></div>
+            <label class="field-label" for="ai-base-url">BASE URL</label>
+            <input id="ai-base-url" class="build-input" value="https://openrouter.ai/api/v1" maxlength="300" autocomplete="url">
+            <label class="field-label" for="ai-model">MODEL ID</label>
+            <input id="ai-model" class="build-input" placeholder="provider/model-name" maxlength="200" autocomplete="off">
+            <label class="field-label" for="ai-key">API KEY</label>
+            <input id="ai-key" class="build-input" type="password" maxlength="4096" autocomplete="current-password">
+            <div class="build-actions"><button id="ai-save-config" class="button button-secondary">Save provider</button><button id="ai-save-key" class="button button-secondary">Save key</button></div>
+            <label class="field-label" for="ai-chat">MODEL PROMPT</label>
+            <textarea id="ai-chat" class="build-chat" maxlength="32000" placeholder="Ask the configured model..."></textarea>
+            <button id="ai-send" class="button button-primary button-wide">Send to AI</button>
+            <pre id="ai-output" class="build-output">AI provider not configured.</pre>
+          </article>
+          <article class="settings-group build-panel">
+            <div class="settings-heading"><div><div class="eyebrow">AUDITED AUTOMATION</div><h2>Recipes</h2></div></div>
+            <div class="build-actions"><button class="button button-secondary" data-automation="health-check">Check health</button><button class="button button-primary" data-automation="desktop-start">Start desktop</button></div>
+            <div class="build-actions" style="margin-top:8px"><button class="button button-secondary button-wide" data-automation="desktop-stop">Stop desktop</button></div>
+            <pre id="automation-output" class="build-output">Fixed recipes only. No arbitrary shell commands.</pre>
+          </article>
+        </div>
+      </section>
+
       <section id="screen-sessions" class="screen-view" data-screen="sessions">
         <div class="page-heading"><div><div class="eyebrow">SESSION HISTORY</div><h1>Sessions<span class="heading-period">.</span></h1><p class="page-subtitle">What CloudDeck has actually done.</p></div></div>
         <article class="history-summary"><div><div class="eyebrow">CURRENT STATE</div><h2 id="history-current">No active desktop</h2><p id="history-caption">Your control plane can stay online while the desktop is stopped.</p></div><div class="history-ring" id="history-ring"><span id="history-ring-dot"></span></div></article>
@@ -160,6 +197,7 @@
       <button class="nav-item active" data-nav="home"><span class="nav-symbol">⌂</span><span>Home</span></button>
       <button class="nav-item" data-nav="play"><span class="nav-symbol">◉</span><span>Play</span></button>
       <button class="nav-item" data-nav="workspace"><span class="nav-symbol">▣</span><span>Workspace</span></button>
+      <button class="nav-item" data-nav="build"><span class="nav-symbol">⌁</span><span>Build</span></button>
       <button class="nav-item" data-nav="sessions"><span class="nav-symbol">◷</span><span>Sessions</span></button>
       <button class="nav-item" data-nav="settings"><span class="nav-symbol">⚙</span><span>Settings</span></button>
     </nav>

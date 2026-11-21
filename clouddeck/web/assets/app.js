@@ -247,6 +247,7 @@
     $$('.screen-view').forEach(node => node.classList.toggle('active', node === target));
     $$('.nav-item').forEach(node => node.classList.toggle('active', node.dataset.nav === screen));
     if (screen === 'workspace') refreshMetrics().catch(() => {});
+    if (screen === 'build') refreshBuild().catch(() => {});
     if (screen === 'sessions') refreshEvents().catch(() => {});
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -512,6 +513,42 @@
     }
   }
 
+  async function refreshBuild() {
+    const [files, ai] = await Promise.all([
+      request('/api/v1/developer/files'),
+      request('/api/v1/ai/status'),
+    ]);
+    $('#ai-base-url').value = ai.base_url || 'https://openrouter.ai/api/v1';
+    $('#ai-model').value = ai.model || '';
+    $('#ai-output').textContent = ai.configured
+      ? `Configured model: ${ai.model}`
+      : 'AI provider not configured.';
+    if (files.files && files.files.length && !$('#developer-name').dataset.loaded) {
+      const latest = files.files[0].name;
+      $('#developer-name').value = latest;
+      const file = await request(`/api/v1/developer/files/${encodeURIComponent(latest)}`);
+      $('#developer-code').value = file.code;
+      $('#developer-name').dataset.loaded = 'true';
+    }
+  }
+
+  async function saveDeveloperFile() {
+    const name = $('#developer-name').value.trim();
+    const code = $('#developer-code').value;
+    await request('/api/v1/developer/files', { method: 'POST', body: { name, code } });
+    showToast('Python file saved.');
+  }
+
+  async function runDeveloperFile() {
+    await saveDeveloperFile();
+    const name = $('#developer-name').value.trim();
+    const result = await request('/api/v1/developer/run', { method: 'POST', body: { name, timeout_seconds: 10 } });
+    const output = result.timed_out
+      ? `Execution timed out.\n${result.stderr}`
+      : `Exit code: ${result.exit_code}\n${result.stdout}${result.stderr}`;
+    $('#developer-output').textContent = output || '(No output)';
+  }
+
   // Login
   $('#login-form').addEventListener('submit', async event => {
     event.preventDefault();
@@ -539,6 +576,46 @@
     const input = $('#access-key');
     input.type = input.type === 'password' ? 'text' : 'password';
     $('#reveal-key').setAttribute('aria-label', input.type === 'password' ? 'Show access key' : 'Hide access key');
+  });
+
+  $('#developer-save').addEventListener('click', () => saveDeveloperFile().catch(error => showToast(error.message)));
+  $('#developer-run').addEventListener('click', () => runDeveloperFile().catch(error => {
+    $('#developer-output').textContent = error.message;
+  }));
+  $('#ai-save-config').addEventListener('click', async () => {
+    try {
+      await request('/api/v1/ai/configure', { method: 'POST', body: { base_url: $('#ai-base-url').value.trim(), model: $('#ai-model').value.trim() } });
+      $('#ai-output').textContent = 'AI provider configuration saved.';
+      showToast('AI provider saved.');
+    } catch (error) { $('#ai-output').textContent = error.message; }
+  });
+  $('#ai-save-key').addEventListener('click', async () => {
+    try {
+      await request('/api/v1/ai/key', { method: 'POST', body: { api_key: $('#ai-key').value } });
+      $('#ai-key').value = '';
+      $('#ai-output').textContent = 'AI API key stored privately.';
+      showToast('AI key saved privately.');
+    } catch (error) { $('#ai-output').textContent = error.message; }
+  });
+  $$('[data-automation]').forEach(button => button.addEventListener('click', async () => {
+    const recipe = button.dataset.automation;
+    $('#automation-output').textContent = `Running ${recipe}...`;
+    try {
+      const result = await request('/api/v1/automation/run', { method: 'POST', body: { recipe } });
+      $('#automation-output').textContent = JSON.stringify(result, null, 2);
+      await refreshBootstrap();
+      showToast('Automation recipe completed.');
+    } catch (error) { $('#automation-output').textContent = error.message; }
+  }));
+
+  $('#ai-send').addEventListener('click', async () => {
+    const prompt = $('#ai-chat').value.trim();
+    if (!prompt) return;
+    $('#ai-output').textContent = 'Waiting for model...';
+    try {
+      const result = await request('/api/v1/ai/chat', { method: 'POST', body: { messages: [{ role: 'user', content: prompt }], max_tokens: 1024 } });
+      $('#ai-output').textContent = result.content || '(No response)';
+    } catch (error) { $('#ai-output').textContent = error.message; }
   });
 
   // Primary navigation and actions

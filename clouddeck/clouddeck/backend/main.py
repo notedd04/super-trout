@@ -104,6 +104,10 @@ class AIChatRequest(BaseModel):
     max_tokens: int = Field(default=1024, ge=64, le=4096)
 
 
+class AutomationRequest(BaseModel):
+    recipe: str = Field(min_length=3, max_length=32)
+
+
 def require_auth(request: Request, mutation: bool = False) -> None:
     security.require(request, mutation=mutation)
 
@@ -286,6 +290,34 @@ def launch_app(payload: LaunchRequest, request: Request) -> dict[str, Any]:
 def metrics(request: Request) -> dict[str, Any]:
     require_auth(request)
     return provider.metrics()
+
+
+@app.get("/api/v1/automation/recipes")
+def automation_recipes(request: Request) -> dict[str, Any]:
+    require_auth(request)
+    return {"recipes": [
+        {"id": "desktop-start", "name": "Start Linux desktop", "safe": True},
+        {"id": "desktop-stop", "name": "Stop Linux desktop", "safe": True},
+        {"id": "health-check", "name": "Check CloudDeck health", "safe": True},
+    ]}
+
+
+@app.post("/api/v1/automation/run")
+def automation_run(payload: AutomationRequest, request: Request) -> dict[str, Any]:
+    require_auth(request, mutation=True)
+    if payload.recipe == "desktop-start":
+        profile_id = database.get_setting("profile", "balanced")
+        result = provider.start(profile_id)
+        database.event("automation.recipe.run", {"recipe": payload.recipe})
+        return {"recipe": payload.recipe, "result": result}
+    if payload.recipe == "desktop-stop":
+        result = provider.stop()
+        database.event("automation.recipe.run", {"recipe": payload.recipe})
+        return {"recipe": payload.recipe, "result": result}
+    if payload.recipe == "health-check":
+        database.event("automation.recipe.run", {"recipe": payload.recipe})
+        return {"recipe": payload.recipe, "result": {"health": "ok", "desktop": provider.status()}}
+    raise HTTPException(status_code=422, detail="Unknown automation recipe.")
 
 
 @app.get("/api/v1/ai/status")
