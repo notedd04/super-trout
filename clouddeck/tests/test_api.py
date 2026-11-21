@@ -65,6 +65,35 @@ def test_profile_mutation_uses_known_profile():
     assert response.json()["profile"]["resolution"] == "800x450"
 
 
+def test_tool_contract_is_allowlisted():
+    client.cookies.clear()
+    login()
+    tools = client.get("/api/v1/tools")
+    assert tools.status_code == 200
+    ids = {item["id"] for item in tools.json()["tools"]}
+    assert {"python", "git", "ffmpeg"}.issubset(ids)
+
+    csrf = client.cookies.get("clouddeck_csrf")
+    rejected = client.post(
+        "/api/v1/tools/run",
+        json={"tool": "bash", "args": ["-c", "echo unsafe"]},
+        headers={"Origin": "https://testserver", "X-CSRF-Token": csrf},
+    )
+    assert rejected.status_code == 422
+
+
+def test_gemini_and_openrouter_provider_presets():
+    client.cookies.clear()
+    csrf = login()
+    gemini = client.post(
+        "/api/v1/providers/preset",
+        json={"provider": "gemini", "model": "gemini-2.5-flash"},
+        headers={"Origin": "https://testserver", "X-CSRF-Token": csrf},
+    )
+    assert gemini.status_code == 200
+    assert gemini.json()["base_url"] == "https://generativelanguage.googleapis.com/v1beta/openai"
+
+
 def test_unknown_application_is_rejected_without_shell_endpoint():
     client.cookies.clear()
     csrf = login()

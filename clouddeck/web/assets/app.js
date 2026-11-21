@@ -523,6 +523,10 @@
     $('#ai-output').textContent = ai.configured
       ? `Configured model: ${ai.model}`
       : 'AI provider not configured.';
+    const tools = await request('/api/v1/tools');
+    const providers = await request('/api/v1/providers');
+    $('#provider-status').textContent = providers.providers.map(provider => `${provider.id}: ${provider.status}`).join('\n');
+    $('#tool-list').textContent = tools.tools.map(tool => `${tool.id}: ${tool.installed ? 'installed' : 'missing'} · ${tool.description}`).join('\n');
     if (files.files && files.files.length && !$('#developer-name').dataset.loaded) {
       const latest = files.files[0].name;
       $('#developer-name').value = latest;
@@ -548,6 +552,32 @@
       : `Exit code: ${result.exit_code}\n${result.stdout}${result.stderr}`;
     $('#developer-output').textContent = output || '(No output)';
   }
+
+  $('#ai-provider-preset').addEventListener('change', () => {
+    const preset = $('#ai-provider-preset').value;
+    const urls = {
+      openrouter: 'https://openrouter.ai/api/v1',
+      gemini: 'https://generativelanguage.googleapis.com/v1beta/openai',
+      'local-model': 'http://127.0.0.1:11434/v1',
+    };
+    $('#ai-base-url').value = urls[preset];
+  });
+
+  $('#tool-run').addEventListener('click', async () => {
+    let args;
+    try { args = JSON.parse($('#tool-args').value); } catch (_) {
+      $('#tool-output').textContent = 'Arguments must be a valid JSON array.';
+      return;
+    }
+    if (!Array.isArray(args) || args.some(arg => typeof arg !== 'string')) {
+      $('#tool-output').textContent = 'Arguments must contain only strings.';
+      return;
+    }
+    try {
+      const result = await request('/api/v1/tools/run', { method: 'POST', body: { tool: $('#tool-id').value, args, timeout_seconds: 30 } });
+      $('#tool-output').textContent = `Exit code: ${result.exit_code}\n${result.stdout}${result.stderr}`;
+    } catch (error) { $('#tool-output').textContent = error.message; }
+  });
 
   // Login
   $('#login-form').addEventListener('submit', async event => {

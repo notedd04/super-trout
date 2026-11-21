@@ -16,6 +16,7 @@ from clouddeck.registry import AdapterRegistry
 from clouddeck.settings import Settings
 from clouddeck.services.developer_workspace import DeveloperWorkspace
 from clouddeck.services.ai_provider import AIProvider
+from clouddeck.services.tool_runner import ToolRunner
 
 settings = Settings.load()
 settings.state_dir.mkdir(parents=True, exist_ok=True)
@@ -27,6 +28,7 @@ provider = registry.provider("codespaces")
 transport = registry.transport("novnc")
 developer_workspace = DeveloperWorkspace(settings.state_dir)
 ai_provider = AIProvider(settings.state_dir)
+tool_runner = ToolRunner(settings.state_dir)
 provider.session_id = database.active_session_id()
 
 
@@ -110,6 +112,17 @@ class AIScreenshotReviewRequest(BaseModel):
 
 class AutomationRequest(BaseModel):
     recipe: str = Field(min_length=3, max_length=32)
+
+
+class ToolRunRequest(BaseModel):
+    tool: str = Field(min_length=2, max_length=32)
+    args: list[str] = Field(default_factory=list, max_length=64)
+    timeout_seconds: float = Field(default=30.0, ge=1.0, le=120.0)
+
+
+class ProviderPresetRequest(BaseModel):
+    provider: str = Field(min_length=2, max_length=32)
+    model: str = Field(min_length=1, max_length=200)
 
 
 def require_auth(request: Request, mutation: bool = False) -> None:
@@ -294,6 +307,57 @@ def launch_app(payload: LaunchRequest, request: Request) -> dict[str, Any]:
 def metrics(request: Request) -> dict[str, Any]:
     require_auth(request)
     return provider.metrics()
+
+
+@app.get("/api/v1/tools")
+def tools(request: Request) -> dict[str, Any]:
+    require_auth(request)
+    return {"tools": tool_runner.tools()}
+
+
+@app.post("/api/v1/tools/run")
+def tools_run(payload: ToolRunRequest, request: Request) -> dict[str, Any]:
+    require_auth(request, mutation=True)
+    try:
+        return tool_runner.run(payload.tool, payload.args, payload.timeout_seconds)
+    except (RuntimeError, ValueError) as error:
+        raise HTTPException(status_code=422 if isinstance(error, ValueError) else 503, detail=str(error)) from error
+
+
+@app.get("/api/v1/tools/jobs/{job_id}")
+def tools_job(job_id: str, request: Request) -> dict[str, Any]:
+    require_auth(request)
+    try:
+        return tool_runner.status(job_id)
+    except (FileNotFoundError, ValueError) as error:
+        raise HTTPException(status_code=404 if isinstance(error, FileNotFoundError) else 422, detail=str(error)) from error
+
+
+@app.get("/api/v1/providers")
+def providers(request: Request) -> dict[str, Any]:
+    require_auth(request)
+    return {"providers": [
+        {"id": "openrouter", "kind": "openai-compatible", "auth": "api-key", "status": "verified-contract"},
+        {"id": "gemini", "kind": "openai-compatible", "auth": "api-key", "status": "api-key-required", "browser_setup": "https://aistudio.google.com/apikey", "cookie_session": "not-used", "vision": "model-dependent", "image_generation": "endpoint-model-dependent"},
+        {"id": "local-model", "kind": "openai-compatible", "auth": "optional", "status": "self-hosted"},
+        {"id": "puter", "kind": "external-browser-ai", "auth": "browser-session", "status": "not-integrated", "note": "No stable server API or cookie extraction; integrate only through an explicit provider SDK/API."},
+    ]}
+
+
+@app.post("/api/v1/providers/preset")
+def provider_preset(payload: ProviderPresetRequest, request: Request) -> dict[str, Any]:
+    require_auth(request, mutation=True)
+    presets = {
+        "openrouter": "https://openrouter.ai/api/v1",
+        "gemini": "https://generativelanguage.googleapis.com/v1beta/openai",
+        "local-model": "http://127.0.0.1:11434/v1",
+    }
+    if payload.provider not in presets:
+        raise HTTPException(status_code=422, detail="Unknown provider preset.")
+    try:
+        return ai_provider.configure(presets[payload.provider], payload.model)
+    except ValueError as error:
+        raise HTTPException(status_code=422, detail=str(error)) from error
 
 
 @app.get("/api/v1/automation/recipes")

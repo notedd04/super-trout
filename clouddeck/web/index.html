@@ -156,6 +156,8 @@
           </article>
           <article class="settings-group build-panel">
             <div class="settings-heading"><div><div class="eyebrow">OPENAI-COMPATIBLE API</div><h2>AI connection</h2></div></div>
+            <label class="field-label" for="ai-provider-preset">PROVIDER PRESET</label>
+            <select id="ai-provider-preset" class="build-input"><option value="openrouter">OpenRouter</option><option value="gemini">Gemini API</option><option value="local-model">Local OpenAI-compatible server</option></select>
             <label class="field-label" for="ai-base-url">BASE URL</label>
             <input id="ai-base-url" class="build-input" value="https://openrouter.ai/api/v1" maxlength="300" autocomplete="url">
             <label class="field-label" for="ai-model">MODEL ID</label>
@@ -164,10 +166,22 @@
             <input id="ai-key" class="build-input" type="password" maxlength="4096" autocomplete="current-password">
             <div class="build-actions"><button id="ai-save-config" class="button button-secondary">Save provider</button><button id="ai-save-key" class="button button-secondary">Save key</button></div>
             <div class="build-actions" style="margin-top:8px"><button id="desktop-capture" class="button button-secondary">Capture screen</button><button id="ai-review-screen" class="button button-primary">Review with AI</button></div>
+            <div id="provider-status" class="build-output">Loading provider status...</div>
+            <a id="gemini-browser-setup" class="button button-secondary button-wide" href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">Open Gemini API-key setup</a>
             <label class="field-label" for="ai-chat">MODEL PROMPT</label>
             <textarea id="ai-chat" class="build-chat" maxlength="32000" placeholder="Ask the configured model..."></textarea>
             <button id="ai-send" class="button button-primary button-wide">Send to AI</button>
             <pre id="ai-output" class="build-output">AI provider not configured.</pre>
+          </article>
+          <article class="settings-group build-panel">
+            <div class="settings-heading"><div><div class="eyebrow">GODOT & SYSTEM TOOLS</div><h2>Tool endpoint</h2></div></div>
+            <div id="tool-list" class="build-output">Loading installed tools...</div>
+            <label class="field-label" for="tool-id">TOOL</label>
+            <select id="tool-id" class="build-input"><option value="python">Python</option><option value="git">Git</option><option value="ffmpeg">FFmpeg</option><option value="godot">Godot</option></select>
+            <label class="field-label" for="tool-args">ARGUMENTS (JSON ARRAY)</label>
+            <input id="tool-args" class="build-input" value='["--version"]' maxlength="4096">
+            <button id="tool-run" class="button button-primary button-wide">Run tool</button>
+            <pre id="tool-output" class="build-output">No tool run yet.</pre>
           </article>
           <article class="settings-group build-panel">
             <div class="settings-heading"><div><div class="eyebrow">AUDITED AUTOMATION</div><h2>Recipes</h2></div></div>

@@ -103,6 +103,7 @@ cp "$PROJECT_DIR/scripts/stop-all.sh" "$STATE_DIR/stop-all.sh"
 cp "$PROJECT_DIR/scripts/reset-access.sh" "$STATE_DIR/reset-access.sh"
 cp "$PROJECT_DIR/scripts/boot-clouddeck.sh" "$STATE_DIR/boot-clouddeck.sh"
 cp "$PROJECT_DIR/scripts/workstation-preset.sh" "$STATE_DIR/workstation-preset.sh"
+cp "$PROJECT_DIR/scripts/install-godot.sh" "$STATE_DIR/install-godot.sh"
 chmod 700 "$STATE_DIR"/*.sh
 
 BASHRC="$HOME/.bashrc"
